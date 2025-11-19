@@ -15,7 +15,7 @@ fn nextLine(reader: anytype, buffer: []u8) !?[]const u8 {
     }
 }
 
-pub fn main() !void {
+fn getConversion() !?[]const u8 {
     const stdout = std.io.getStdOut();
     const stdin = std.io.getStdIn();
     var buffer: [2]u8 = undefined;
@@ -23,9 +23,33 @@ pub fn main() !void {
     try stdout.writeAll("Would you like to convert to [C]elsius or [F]ahrenheit?\n");
     const input = (try nextLine(stdin.reader(), &buffer)).?;
 
-    if (eql(u8, input, "C")) {
+    return input;
+}
+
+pub fn main() !void {
+    const stdout = std.io.getStdOut();
+    const stdin = std.io.getStdIn();
+    var buffer: [2]u8 = undefined;
+
+    var temp_input = (try getConversion()).?;
+
+    if (eql(u8, temp_input, "C")) {
         try stdout.writeAll("Your input was Celsius\n");
-    } else if (eql(u8, input, "F")) {
+    } else if (eql(u8, temp_input, "F")) {
         try stdout.writeAll("Your input was Fahrenheit\n");
+    } else {
+        try stdout.writeAll("Your input was neither C or F...\n");
+        try stdout.writeAll("Aborting\n");
+        return;
+    }
+
+    try stdout.writeAll("Is this acceptable?\n");
+    var correct_input = (try nextLine(stdin.reader(), &buffer)).?;
+
+    while (!eql(u8, correct_input, "Y")) {
+        temp_input = (try getConversion()).?;
+
+        try stdout.writeAll("Is this acceptable?\n");
+        correct_input = (try nextLine(stdin.reader(), &buffer)).?;
     }
 }
